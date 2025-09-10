@@ -9,53 +9,53 @@ class MyTextProcessor extends TextComponent {
 		this.env = env;
 	}
 
-	async onTranscript(text: string, reply: (text: string) => void) {
-		console.log("Transcript from User: ", text);
-
-    const sum = (args: { a: number; b: number }): Promise<string> => {
-      const { a, b } = args;
-      return Promise.resolve((a + b).toString());
-    };
-
-		// Create AI Gateway configuration
-		const aiGateway = {
-			...this.env.AI,
-
+	private async ToolCallingAttempt(userMessage: string): Promise<string> {
+		const sum = (args: { a: number; b: number }): Promise<string> => {
+			const { a, b } = args;
+			return Promise.resolve((a + b).toString());
 		};
 
 		const response = await runWithTools(
-				this.env.AI,
-				"@hf/nousresearch/hermes-2-pro-mistral-7b",
-				{
-        // Messages
-        messages: [
+			this.env.AI,
+			"@hf/nousresearch/hermes-2-pro-mistral-7b",
+			{
+				// Messages
+				messages: [
 					{ role: 'system', content: 'You are a helpful assistant respond concisely and do not repeat yourself. ' },
-          {
-            role: "user",
-            content: text,
-          },
-        ],
-        // Definition of available tools the AI model can leverage
-        tools: [
-          {
-            name: "sum",
-            description: "Sum up two numbers and returns the result",
-            parameters: {
-              type: "object",
-              properties: {
-                a: { type: "number", description: "the first number" },
-                b: { type: "number", description: "the second number" },
-              },
-              required: ["a", "b"],
-            },
-            // reference to previously defined function
-            function: sum,
-          },
-        ],
-      },
-    );
-		console.log("Response: ", response.response);
-    reply(response.response);
+					{
+						role: "user",
+						content: userMessage,
+					},
+				],
+				// Definition of available tools the AI model can leverage
+				tools: [
+					{
+						name: "sum",
+						description: "Sum up two numbers and returns the result",
+						parameters: {
+							type: "object",
+							properties: {
+								a: { type: "number", description: "the first number" },
+								b: { type: "number", description: "the second number" },
+							},
+							required: ["a", "b"],
+						},
+						// reference to previously defined function
+						function: sum,
+					},
+				],
+			},
+		);
+
+		return response.response;
+	}
+
+	async onTranscript(text: string, reply: (text: string) => void) {
+		console.log("Transcript from User: ", text);
+
+		const response = await this.ToolCallingAttempt(text);
+		console.log("Response: ", response);
+		reply(response);
 	}
 }
 
