@@ -7,7 +7,9 @@
 	"name": "realtime-agent",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-09-09",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"observability": {
 		"enabled": true
 	},
@@ -16,7 +18,9 @@
 	},
 	"migrations": [
 		{
-			"new_sqlite_classes": ["MyAgent"],
+			"new_sqlite_classes": [
+				"MyAgent"
+			],
 			"tag": "v1"
 		}
 	],
@@ -31,8 +35,8 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "northwind",
-			"database_id": "d2757109-c1bf-4a66-b325-4d9c09b3e3a7"
+			"database_name": "realtime-agent-experiment",
+			"database_id": "5e67f6ac-0912-4e96-bc23-8b1d28d5c2a5"
 		}
 	]
 	/**
