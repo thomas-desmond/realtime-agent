@@ -16,6 +16,7 @@
 		"wrangler": "^4.35.0"
 	},
 	"dependencies": {
+		"@cloudflare/ai-utils": "^1.0.1",
 		"@cloudflare/realtime-agents": "^0.0.6"
 	}
 }
