@@ -11,18 +11,51 @@ class MyTextProcessor extends TextComponent {
 
 	async onTranscript(text: string, reply: (text: string) => void) {
 		console.log("Transcript from User: ", text);
-		const messages = [
-			{ role: 'system', content: 'You are a helpful assistant respond concisely and do not repeat yourself. ' },
-			{ role: 'user', content: text },
-		];
 
-		const { response } = await this.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-			messages,
-		});
+    const sum = (args: { a: number; b: number }): Promise<string> => {
+      const { a, b } = args;
+      return Promise.resolve((a + b).toString());
+    };
 
-		console.log("Response: ", response);
+		// Create AI Gateway configuration
+		const aiGateway = {
+			...this.env.AI,
 
-		reply(response!);
+		};
+
+		const response = await runWithTools(
+				this.env.AI,
+				"@hf/nousresearch/hermes-2-pro-mistral-7b",
+				{
+        // Messages
+        messages: [
+					{ role: 'system', content: 'You are a helpful assistant respond concisely and do not repeat yourself. ' },
+          {
+            role: "user",
+            content: text,
+          },
+        ],
+        // Definition of available tools the AI model can leverage
+        tools: [
+          {
+            name: "sum",
+            description: "Sum up two numbers and returns the result",
+            parameters: {
+              type: "object",
+              properties: {
+                a: { type: "number", description: "the first number" },
+                b: { type: "number", description: "the second number" },
+              },
+              required: ["a", "b"],
+            },
+            // reference to previously defined function
+            function: sum,
+          },
+        ],
+      },
+    );
+		console.log("Response: ", response.response);
+    reply(response.response);
 	}
 }
 
