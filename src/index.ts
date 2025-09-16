@@ -1,5 +1,5 @@
 import { DeepgramSTT, TextComponent, RealtimeKitTransport, ElevenLabsTTS, RealtimeAgent } from '@cloudflare/realtime-agents';
-import { runWithTools } from "@cloudflare/ai-utils";
+import { runWithTools } from '@cloudflare/ai-utils';
 
 class MyTextProcessor extends TextComponent {
 	env: Env;
@@ -15,47 +15,43 @@ class MyTextProcessor extends TextComponent {
 			return Promise.resolve((a + b).toString());
 		};
 
-		const response = await runWithTools(
-			this.env.AI,
-			"@hf/nousresearch/hermes-2-pro-mistral-7b",
-			{
-				// Messages
-				messages: [
-					{ role: 'system', content: 'You are a helpful assistant respond concisely and do not repeat yourself. ' },
-					{
-						role: "user",
-						content: userMessage,
-					},
-				],
-				// Definition of available tools the AI model can leverage
-				tools: [
-					{
-						name: "sum",
-						description: "Sum up two numbers and returns the result",
-						parameters: {
-							type: "object",
-							properties: {
-								a: { type: "number", description: "the first number" },
-								b: { type: "number", description: "the second number" },
-							},
-							required: ["a", "b"],
+		const response = await runWithTools(this.env.AI, '@hf/nousresearch/hermes-2-pro-mistral-7b', {
+			// Messages
+			messages: [
+				{ role: 'system', content: 'You are a helpful assistant respond concisely and do not repeat yourself. ' },
+				{
+					role: 'user',
+					content: userMessage,
+				},
+			],
+			// Definition of available tools the AI model can leverage
+			tools: [
+				{
+					name: 'sum',
+					description: 'Sum up two numbers and returns the result',
+					parameters: {
+						type: 'object',
+						properties: {
+							a: { type: 'number', description: 'the first number' },
+							b: { type: 'number', description: 'the second number' },
 						},
-						// reference to previously defined function
-						function: sum,
+						required: ['a', 'b'],
 					},
-				],
-			},
-		);
+					// reference to previously defined function
+					function: sum,
+				},
+			],
+		});
 
 		return response.response;
 	}
-
 	async onTranscript(text: string, reply: (text: string) => void) {
-		console.log("Transcript from User: ", text);
-
-		const response = await this.ToolCallingAttempt(text);
-		console.log("Response: ", response);
-		reply(response);
+		console.log('Transcript from User: ', text);
+		const { response } = await this.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+			prompt: text,
+		});
+		console.log('Response: ', response);
+		reply(response!);
 	}
 }
 
